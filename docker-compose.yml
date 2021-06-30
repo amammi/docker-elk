@@ -1,6 +1,14 @@
 version: '3.2'
 
 services:
+  filebeat:
+    image: devops/filebeatimage
+    networks:
+      - elk
+      - taxcode_network
+    volumes:
+      - /var/lib/docker/containers:/usr/share/dockerlogs/data
+      - /var/run/docker.sock
   elasticsearch:
     build:
       context: elasticsearch/
@@ -25,6 +33,7 @@ services:
       discovery.type: single-node
     networks:
       - elk
+      - taxcode_network
 
   logstash:
     build:
@@ -39,7 +48,7 @@ services:
       - type: bind
         source: ./logstash/pipeline
         target: /usr/share/logstash/pipeline
-        read_only: true
+        read_only: false
     ports:
       - "5044:5044"
       - "5000:5000/tcp"
@@ -49,6 +58,7 @@ services:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
       - elk
+      - taxcode_network
     depends_on:
       - elasticsearch
 
@@ -66,11 +76,36 @@ services:
       - "5601:5601"
     networks:
       - elk
+      - taxcode_network
     depends_on:
       - elasticsearch
 
+  bot:
+    image: service/bot:latest
+    networks:
+      - taxcode_network
+      - elk
+
+  taxcode:
+    image: service/taxcode:latest
+    ports:
+    - 8080:8080
+    networks:
+      - taxcode_network
+      - elk
+
+  comuni:
+    image: service/comuni:latest
+    ports:
+      - 8050:8050
+    networks:
+      - taxcode_network
+      - elk
+
 networks:
   elk:
+    driver: bridge
+  taxcode_network:
     driver: bridge
 
 volumes:
