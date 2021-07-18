@@ -1,14 +1,30 @@
 filebeat.inputs:
-  - type: docker
-    containers:
-      path: "/usr/share/dockerlogs/data"
-      stream: "stdout"
-      ids:
-        - "013a63a5443352526d941ce6aba603ed1521b1d1d453451e5c68eb8fd13e7cef"
+  - type: container
+    stream: stdout
+    paths: 
+      - "/usr/share/dockerlogs/data/0d296b603547030dee75e59192234b2de7d2326c9ed9d0d29c4d71774b686ef9/*.log"
+    fields:
+      service_name: comuni
+  
+  - type: container
+    stream: stdout
+    paths:
+      - "/usr/share/dockerlogs/data/67fac68962b0ff907abc869aac6ee2abac589831e7ceb57dea4a52761d4e7a38/*.log"
+    fields:
+      service_name: taxcode
+  
+  - type: container
+    stream: stdout
+    paths:
+      - "/usr/share/dockerlogs/data/128a1dcf2d1e35328139786476e06a5837af59e4cf42b62a3de79443256d708d/*.log"
+    fields:
+      service_name: bot
+
+    
 processors:
   - add_docker_metadata:
       host: "unix:///var/run/docker.sock"
- 
+       
 filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
   reload.enabled: false
